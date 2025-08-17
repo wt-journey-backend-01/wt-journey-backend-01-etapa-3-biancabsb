@@ -15,6 +15,7 @@ const getAllAgentes = async (req, res, next) => {
     }
 };
 
+
 const getAgenteById = async (req, res, next) => {
     const { id } = req.params;
     try {
@@ -55,13 +56,18 @@ const isValidDate = (dateString) => {
 const updateAgente = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { nome, cargo, dataDeIncorporacao } = req.body;
+        const { nome, cargo, dataDeIncorporacao, ...rest } = req.body;
         if (!nome || !cargo || !dataDeIncorporacao) {
             next(new APIError("Todos os campos são obrigatórios", 400));
             return;
         }
         if (!isValidDate(dataDeIncorporacao)) {
             next(new APIError("Data de incorporação inválida ou no futuro", 400));
+            return;
+
+        }
+        if (rest.id !== undefined) {
+            next(new APIError("Não é permitido alterar o ID do agente", 400));
             return;
         }
         const agenteAtualizado = await agentesRepository.update(id, { nome, cargo, dataDeIncorporacao });

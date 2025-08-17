@@ -30,7 +30,7 @@ const getCasoById = async (req, res, next) => {
 const createCaso = async (req, res, next) => {
     try {
         const { titulo, descricao, status, agentes_id } = req.body;
-        
+
         if (!titulo || !descricao || !status || !agentes_id) {
             next(new APIError("Todos os campos são obrigatórios", 400));
             return;
@@ -44,7 +44,7 @@ const createCaso = async (req, res, next) => {
             next(new APIError("Status inválido", 400));
             return;
         }
-        
+
         const novoCaso = await casosRepository.create({ titulo, descricao, status, agentes_id });
         res.status(201).json(novoCaso);
     } catch (error) {
@@ -54,7 +54,7 @@ const createCaso = async (req, res, next) => {
 const updateCaso = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { titulo, descricao, status, agentes_id } = req.body;
+        const { titulo, descricao, status, agentes_id, ...rest } = req.body;
         const agente = await agentesRepository.read(agentes_id);
         if (!agente) {
             next(new APIError("Agente não encontrado para o caso", 404));
@@ -68,6 +68,10 @@ const updateCaso = async (req, res, next) => {
             next(new APIError("Status inválido", 400));
             return;
         }
+        if (rest.id !== undefined) {
+    next(new APIError("Não é permitido alterar o ID do agente", 400));
+    return;
+}
         const casoAtualizado = await casosRepository.update(id, { titulo, descricao, status, agentes_id });
         if (!casoAtualizado) {
             next(new APIError("Caso não encontrado", 404));
@@ -86,8 +90,15 @@ const updateCasoPartial = async (req, res, next) => {
         if (titulo !== undefined) fieldsToUpdate.titulo = titulo;
         if (descricao !== undefined) fieldsToUpdate.descricao = descricao;
         if (status !== undefined) fieldsToUpdate.status = status;
-        if (agentes_id !== undefined) fieldsToUpdate.agentes_id = agentes_id;
-        if (!["aberto", "solucionado"].includes(status)) {
+        if (agentes_id !== undefined) {
+            const agente = await agentesRepository.read(agentes_id);
+            if (!agente) {
+                next(new APIError("Agente não encontrado para o caso", 404));
+                return;
+            }
+            fieldsToUpdate.agentes_id = agentes_id;
+        }
+        if (status !== undefined && !["aberto", "solucionado"].includes(status)) {
             next(new APIError("Status inválido", 400));
             return;
         }
