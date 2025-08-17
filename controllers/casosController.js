@@ -1,4 +1,4 @@
-const ocorrenciasRepository = require('../repositories/casosRepository');
+const casosRepository = require('../repositories/casosRepository');
 class APIError extends Error {
     constructor(message, statusCode) {
         super(message);
@@ -6,18 +6,18 @@ class APIError extends Error {
     }
 }
 
-const getAllCasos = (req, res, next) => {
+const getAllCasos = async (req, res, next) => {
     try {
-        const casos = ocorrenciasRepository.readAll();
+        const casos = await casosRepository.readAll();
         res.status(200).json(casos);
     } catch (error) {
         next(error);
     }
 };
-const getCasoById = (req, res, next) => {
+const getCasoById = async (req, res, next) => {
     const { id } = req.params;
     try {
-        const caso = ocorrenciasRepository.read(id);
+        const caso = await casosRepository.read(id);
         if (!caso) {
             next(new APIError("Caso não encontrado", 404));
             return;
@@ -27,10 +27,15 @@ const getCasoById = (req, res, next) => {
         next(error);
     }
 };
-const createCaso = (req, res, next) => {
+const createCaso = async (req, res, next) => {
     try {
-        const { titulo, descricao, status, agente_id } = req.body;
-        if (!titulo || !descricao || !status || !agente_id) {
+        const { titulo, descricao, status, agentes_id } = req.body;
+        const agente = await agentesRepository.read(agentes_id);
+        if (!agente) {
+            next(new APIError("Agente não encontrado para o caso", 404));
+            return;
+        }
+        if (!titulo || !descricao || !status || !agentes_id) {
             next(new APIError("Todos os campos são obrigatórios", 400));
             return;
         }
@@ -38,17 +43,21 @@ const createCaso = (req, res, next) => {
             next(new APIError("Status inválido", 400));
             return;
         }
-        const novoCaso = ocorrenciasRepository.create(titulo, descricao, status, agente_id);
+        const novoCaso = await casosRepository.create(titulo, descricao, status, agentes_id);
         res.status(201).json(novoCaso);
     } catch (error) {
         next(error);
     }
 };
-const updateCaso = (req, res, next) => {
+const updateCaso = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { titulo, descricao, status, agente_id } = req.body;
-        if (!titulo || !descricao || !status || !agente_id) {
+        const { titulo, descricao, status, agentes_id } = req.body;
+        if (!agente) {
+            next(new APIError("Agente não encontrado para o caso", 404));
+            return;
+        }
+        if (!titulo || !descricao || !status || !agentes_id) {
             next(new APIError("Todos os campos são obrigatórios", 400));
             return;
         }
@@ -56,7 +65,7 @@ const updateCaso = (req, res, next) => {
             next(new APIError("Status inválido", 400));
             return;
         }
-        const casoAtualizado = ocorrenciasRepository.update(id, titulo, descricao, status, agente_id);
+        const casoAtualizado = await casosRepository.update(id, titulo, descricao, status, agentes_id);
         if (!casoAtualizado) {
             next(new APIError("Caso não encontrado", 404));
             return;
@@ -66,11 +75,11 @@ const updateCaso = (req, res, next) => {
         next(error);
     }
 };
-const updateCasoPartial = (req, res, next) => {
+const updateCasoPartial = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { titulo, descricao, status, agente_id } = req.body;
-        const casoAtualizado = ocorrenciasRepository.update(id, titulo, descricao, status, agente_id);
+        const { titulo, descricao, status, agentes_id } = req.body;
+        const casoAtualizado = await casosRepository.update(id, titulo, descricao, status, agentes_id);
         if (!casoAtualizado) {
             next(new APIError("Caso não encontrado", 404));
             return;
@@ -81,10 +90,10 @@ const updateCasoPartial = (req, res, next) => {
     }
 };
 
-const deleteCaso = (req, res, next) => {
+const deleteCaso = async (req, res, next) => {
     const { id } = req.params;
     try {
-        const resultado = ocorrenciasRepository.remove(id);
+        const resultado = await casosRepository.remove(id);
         if (!resultado) {
             next(new APIError("Caso não encontrado", 404));
             return;

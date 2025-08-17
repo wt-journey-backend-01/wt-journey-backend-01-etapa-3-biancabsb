@@ -6,19 +6,19 @@ class APIError extends Error {
     }
 }
 
-const getAllAgentes = (req, res, next) => {
+const getAllAgentes = async (req, res, next) => {
     try {
-        const agentes = agentesRepository.readAll();
+        const agentes = await agentesRepository.readAll();
         res.status(200).json(agentes);
     } catch (error) {
         next(error);
     }
 };
 
-const getAgenteById = (req, res, next) => {
+const getAgenteById = async (req, res, next) => {
     const { id } = req.params;
     try {
-        const agente = agentesRepository.read(id);
+        const agente = await agentesRepository.read(id);
         if (!agente) {
             next(new APIError("Agente não encontrado", 404));
             return;
@@ -29,21 +29,30 @@ const getAgenteById = (req, res, next) => {
     }
 };
 
-const createAgente = (req, res, next) => {
+const createAgente = async (req, res, next) => {
     try {
         const { nome, cargo, dataDeIncorporacao } = req.body;
         if (!nome || !cargo || !dataDeIncorporacao) {
             next(new APIError("Todos os campos são obrigatórios", 400));
             return;
         }
-        const novoAgente = agentesRepository.create({ nome, cargo, dataDeIncorporacao });
+        if (!isValidDate(dataDeIncorporacao)) {
+            next(new APIError("Data de incorporação inválida ou no futuro", 400));
+            return;
+        }
+        const novoAgente = await agentesRepository.create({ nome, cargo, dataDeIncorporacao });
         res.status(201).json(novoAgente);
     } catch (error) {
         next(error);
     }
 };
+const isValidDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    return !isNaN(date) && date <= now;
+};
 
-const updateAgente = (req, res, next) => {
+const updateAgente = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { nome, cargo, dataDeIncorporacao } = req.body;
@@ -51,7 +60,11 @@ const updateAgente = (req, res, next) => {
             next(new APIError("Todos os campos são obrigatórios", 400));
             return;
         }
-        const agenteAtualizado = agentesRepository.update(id, { nome, cargo, dataDeIncorporacao });
+        if (!isValidDate(dataDeIncorporacao)) {
+            next(new APIError("Data de incorporação inválida ou no futuro", 400));
+            return;
+        }
+        const agenteAtualizado = await agentesRepository.update(id, { nome, cargo, dataDeIncorporacao });
         if (!agenteAtualizado) {
             next(new APIError("Agente não encontrado", 404));
             return;
@@ -61,11 +74,11 @@ const updateAgente = (req, res, next) => {
         next(error);
     }
 };
-const updateAgentePartial = (req, res, next) => {
+const updateAgentePartial = async (req, res, next) => {
     const { id } = req.params;
     const { nome, cargo, dataDeIncorporacao } = req.body;
     try {
-        const agenteAtualizado = agentesRepository.update(id, { nome, cargo, dataDeIncorporacao });
+        const agenteAtualizado = await agentesRepository.update(id, { nome, cargo, dataDeIncorporacao });
         if (!agenteAtualizado) {
             next(new APIError("Agente não encontrado", 404));
             return;
@@ -76,10 +89,10 @@ const updateAgentePartial = (req, res, next) => {
     }
 };
 
-const deleteAgente = (req, res, next) => {
+const deleteAgente = async (req, res, next) => {
     const { id } = req.params;
     try {
-        const resultado = agentesRepository.remove(id);
+        const resultado = await agentesRepository.remove(id);
         if (!resultado) {
             next(new APIError("Agente não encontrado", 404));
             return;
