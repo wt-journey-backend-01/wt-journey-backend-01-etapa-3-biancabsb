@@ -1,4 +1,4 @@
-
+const db = require('../db/db'); 
 async function create(object) {
     try {
         const created = await db("casos").insert(object, ["*"]);
@@ -11,7 +11,7 @@ async function create(object) {
 async function read(id) {
     try {
         const caso = await db("casos").select("*").where({ id });
-        return caso;
+        return caso[0] || null;
     } catch (error) {
         return null;
     }

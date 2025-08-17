@@ -43,7 +43,7 @@ const createCaso = async (req, res, next) => {
             next(new APIError("Status inválido", 400));
             return;
         }
-        const novoCaso = await casosRepository.create(titulo, descricao, status, agentes_id);
+        const novoCaso = await casosRepository.create({titulo, descricao, status, agentes_id});
         res.status(201).json(novoCaso);
     } catch (error) {
         next(error);
@@ -53,6 +53,7 @@ const updateCaso = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { titulo, descricao, status, agentes_id } = req.body;
+        const agente = await agentesRepository.read(agentes_id);
         if (!agente) {
             next(new APIError("Agente não encontrado para o caso", 404));
             return;
@@ -65,7 +66,7 @@ const updateCaso = async (req, res, next) => {
             next(new APIError("Status inválido", 400));
             return;
         }
-        const casoAtualizado = await casosRepository.update(id, titulo, descricao, status, agentes_id);
+        const casoAtualizado = await casosRepository.update(id, {titulo, descricao, status, agentes_id});
         if (!casoAtualizado) {
             next(new APIError("Caso não encontrado", 404));
             return;

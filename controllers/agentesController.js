@@ -78,7 +78,11 @@ const updateAgentePartial = async (req, res, next) => {
     const { id } = req.params;
     const { nome, cargo, dataDeIncorporacao } = req.body;
     try {
-        const agenteAtualizado = await agentesRepository.update(id, { nome, cargo, dataDeIncorporacao });
+        const fieldsToUpdate = {};
+        if (nome !== undefined) fieldsToUpdate.nome = nome;
+        if (cargo !== undefined) fieldsToUpdate.cargo = cargo;
+        if (dataDeIncorporacao !== undefined) fieldsToUpdate.dataDeIncorporacao = dataDeIncorporacao;
+        const agenteAtualizado = await agentesRepository.update(id, fieldsToUpdate);
         if (!agenteAtualizado) {
             next(new APIError("Agente não encontrado", 404));
             return;
