@@ -11,20 +11,17 @@ exports.seed = async function(knex) {
     {
       titulo: 'Roubo de carro',
       descricao: 'Veículo furtado no centro da cidade',
-      status: 'aberto',
-      agentes_id: 1
+      status: 'aberto'
     },
     {
       titulo: 'Fraude bancária',
       descricao: 'Transações suspeitas em conta corrente',
-      status: 'solucionado',
-      agentes_id: 2
+      status: 'solucionado'
     },
     {
       titulo: 'Desaparecimento',
       descricao: 'Pessoa desaparecida no bairro industrial',
-      status: 'aberto',
-      agentes_id: 3
+      status: 'aberto'
     }
   ]);
 };
