@@ -1,4 +1,6 @@
 const casosRepository = require('../repositories/casosRepository');
+const agentesRepository = require('../repositories/agentesRepository');
+
 class APIError extends Error {
     constructor(message, statusCode) {
         super(message);
