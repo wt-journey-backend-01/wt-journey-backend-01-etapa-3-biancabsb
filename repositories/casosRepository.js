@@ -4,7 +4,8 @@ async function create(object) {
         const created = await db("casos").insert(object).returning('*');
         return created[0];
     } catch (error) {
-        return null;
+        console.error('Erro ao criar caso:', error);
+        throw error;
     }
 }
 
@@ -13,7 +14,8 @@ async function read(id) {
         const caso = await db("casos").select("*").where({ id });
         return caso[0] || null;
     } catch (error) {
-        return null;
+        console.error('Erro ao ler caso:', error);
+        throw error;
     }
 }
 async function readAll() {
@@ -21,7 +23,8 @@ async function readAll() {
         const casos = await db("casos").select("*");
         return casos;
     } catch (error) {
-        return null;
+        console.error('Erro ao ler todos os casos:', error);
+        throw error;
     }
 }
 
@@ -29,12 +32,12 @@ async function update(id, fieldsToUpdate) {
     try {
         const updated = await db("casos").where({ id: id }).update(fieldsToUpdate).returning('*');
         if (updated.length === 0) {
-                    return false;
+            return false;
         }
         return updated[0];
     } catch (error) {
-        console.log(error);
-        return false;
+        console.error('Erro ao atualizar caso:', error);
+        throw error;
     }
 }
 
@@ -46,8 +49,8 @@ async function remove(id) {
         }
         return true
     } catch (error) {
-        console.log(error)
-        return false
+        console.error('Erro ao remover caso:', error);
+        throw error;
     }
 }
 
