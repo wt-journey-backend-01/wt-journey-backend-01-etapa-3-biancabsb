@@ -29,10 +29,10 @@ async function readAll() {
 async function update(id, fieldsToUpdate) {
     try {
         const updated = await db("agentes").where({ id: id }).update(fieldsToUpdate).returning('*');
-        if (!updated) {
-            return false
+        if (updated.length === 0) {
+                    return false;
         }
-        return updated[0]
+        return updated[0];
     } catch (error) {
         console.log(error)
         return false

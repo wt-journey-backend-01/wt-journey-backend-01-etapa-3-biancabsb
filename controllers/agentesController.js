@@ -95,6 +95,10 @@ const updateAgentePartial = async (req, res, next) => {
             next(new APIError("Não é permitido alterar o ID do agente", 400));
             return;
         }
+        if (Object.keys(rest).length > 0) {
+            next(new APIError("Campo(s) inválido(s): " + Object.keys(rest).join(", "), 400));
+            return;
+        }
         const agenteAtualizado = await agentesRepository.update(id, fieldsToUpdate);
         if (!agenteAtualizado) {
             next(new APIError("Agente não encontrado", 404));
@@ -114,7 +118,7 @@ const deleteAgente = async (req, res, next) => {
             next(new APIError("Agente não encontrado", 404));
             return;
         }
-        res.status().send();
+        res.status(204).send();
     } catch (error) {
         next(error);
     }

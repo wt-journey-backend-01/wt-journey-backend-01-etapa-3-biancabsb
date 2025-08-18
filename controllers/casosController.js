@@ -85,7 +85,7 @@ const updateCaso = async (req, res, next) => {
 const updateCasoPartial = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { titulo, descricao, status, agentes_id } = req.body;
+        const { titulo, descricao, status, agentes_id, ...rest } = req.body;
         const fieldsToUpdate = {};
         if (titulo !== undefined) fieldsToUpdate.titulo = titulo;
         if (descricao !== undefined) fieldsToUpdate.descricao = descricao;
@@ -100,6 +100,14 @@ const updateCasoPartial = async (req, res, next) => {
         }
         if (status !== undefined && !["aberto", "solucionado"].includes(status)) {
             next(new APIError("Status inválido", 400));
+            return;
+        }
+         if (rest.id !== undefined) {
+            next(new APIError("Não é permitido alterar o ID do caso", 400));
+            return;
+        }
+        if (Object.keys(rest).length > 0) {
+            next(new APIError("Campo(s) inválido(s): " + Object.keys(rest).join(", "), 400));
             return;
         }
 
@@ -122,7 +130,7 @@ const deleteCaso = async (req, res, next) => {
             next(new APIError("Caso não encontrado", 404));
             return;
         }
-        res.status().send();
+        res.status(204).send();
     } catch (error) {
         next(error);
     }

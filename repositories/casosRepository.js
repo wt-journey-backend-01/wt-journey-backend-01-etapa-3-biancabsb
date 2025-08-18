@@ -1,8 +1,8 @@
-const db = require('../db/db'); 
+const db = require('../db/db');
 async function create(object) {
     try {
         const created = await db("casos").insert(object).returning('*');
-        return  created[0];
+        return created[0];
     } catch (error) {
         return null;
     }
@@ -28,13 +28,13 @@ async function readAll() {
 async function update(id, fieldsToUpdate) {
     try {
         const updated = await db("casos").where({ id: id }).update(fieldsToUpdate).returning('*');
-        if (!updated) {
-            return false
+        if (updated.length === 0) {
+                    return false;
         }
-        return updated[0]
+        return updated[0];
     } catch (error) {
-        console.log(error)
-        return false
+        console.log(error);
+        return false;
     }
 }
 

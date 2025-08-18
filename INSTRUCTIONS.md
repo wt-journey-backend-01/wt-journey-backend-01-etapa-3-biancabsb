@@ -13,6 +13,7 @@
 # 2. Executar migrations
 # - Instale as dependências: npm install
 # - Execute as migrations: npx knex migrate:latest
+# - Atenção à ordem: primeiro agentes e depois casos
 # 3. Rodar seeds
 # - Execute as seeds: npx knex seed:run
 # Banco configurado e API pronta para uso.
