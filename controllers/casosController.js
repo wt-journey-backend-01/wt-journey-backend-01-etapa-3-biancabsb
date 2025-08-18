@@ -69,9 +69,9 @@ const updateCaso = async (req, res, next) => {
             return;
         }
         if (rest.id !== undefined) {
-    next(new APIError("Não é permitido alterar o ID do agente", 400));
-    return;
-}
+            next(new APIError("Não é permitido alterar o ID do agente", 400));
+            return;
+        }
         const casoAtualizado = await casosRepository.update(id, { titulo, descricao, status, agentes_id });
         if (!casoAtualizado) {
             next(new APIError("Caso não encontrado", 404));
@@ -122,7 +122,7 @@ const deleteCaso = async (req, res, next) => {
             next(new APIError("Caso não encontrado", 404));
             return;
         }
-        res.status(204).send();
+        res.status().send();
     } catch (error) {
         next(error);
     }

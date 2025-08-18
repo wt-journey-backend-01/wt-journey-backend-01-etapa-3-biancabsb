@@ -82,12 +82,19 @@ const updateAgente = async (req, res, next) => {
 };
 const updateAgentePartial = async (req, res, next) => {
     const { id } = req.params;
-    const { nome, cargo, dataDeIncorporacao } = req.body;
+    const { nome, cargo, dataDeIncorporacao, ...rest } = req.body;
     try {
         const fieldsToUpdate = {};
         if (nome !== undefined) fieldsToUpdate.nome = nome;
         if (cargo !== undefined) fieldsToUpdate.cargo = cargo;
-        if (dataDeIncorporacao !== undefined) fieldsToUpdate.dataDeIncorporacao = dataDeIncorporacao;
+        if (dataDeIncorporacao !== undefined && !isValidDate(dataDeIncorporacao)) {
+            next(new APIError("Data de incorporação inválida ou no futuro", 400));
+            return;
+        }
+        if (rest.id !== undefined) {
+            next(new APIError("Não é permitido alterar o ID do agente", 400));
+            return;
+        }
         const agenteAtualizado = await agentesRepository.update(id, fieldsToUpdate);
         if (!agenteAtualizado) {
             next(new APIError("Agente não encontrado", 404));
@@ -107,7 +114,7 @@ const deleteAgente = async (req, res, next) => {
             next(new APIError("Agente não encontrado", 404));
             return;
         }
-        res.status(204).send();
+        res.status().send();
     } catch (error) {
         next(error);
     }
